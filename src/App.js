@@ -1,7 +1,22 @@
 import "./App.css";
-import { AiOutlineSearch } from "react-icons/ai";
+import { AiOutlineStar, AiOutlineFork, AiOutlineEye } from "react-icons/ai";
+import { IconContext } from "react-icons";
+import { useState } from "react";
+import axios from "axios";
 
+const baseUrl="http://localhost:8080/repository/"
 function App() {
+  const [search, setSearch] = useState("");
+  const [data, setData] = useState()
+  function handleChange(e){
+    setSearch(e.target.value);
+  }
+  function handleSearch(){
+    console.log(search)
+    axios.get(baseUrl+search).then((response)=>{
+      console.log(response)
+    })
+  }
   return (
     <div className="grid grid-cols-7 p-7">
       <div></div>
@@ -10,78 +25,43 @@ function App() {
         <input
           type="text"
           className="text-2xl h-12 justify-self-center col-span-2 w-full rounded-l-lg border-2"
+          value={search}
+          onChange={handleChange}
         />
-        <button className="bg-blue-500 text-white rounded-r-lg flex flex-row justify-center py-2 text-2xl">
+        <button className="bg-blue-500 text-white rounded-r-lg flex flex-row justify-center py-2 text-2xl" onClick={handleSearch}>
           Search
-          <AiOutlineSearch />
         </button>
-        <h1 className="col-span-2 text-3xl mt-5">32 Repos Found</h1>
-        <button
-          classNAme="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center"
-          type="button"
-          data-dropdown-toggle="dropdown"
-        >
-          Dropdown button{" "}
-          <svg
-            classNAme="w-4 h-4 ml-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M19 9l-7 7-7-7"
-            ></path>
-          </svg>
-        </button>
+        <h1 className="col-span-2 text-3xl my-5">32 Repos Found</h1>
+        <div className="col-span-3 flex flex-col">
 
-        <div
-          classNAme="hidden bg-white text-base z-50 list-none divide-y divide-gray-100 rounded shadow my-4"
-          id="dropdown"
-        >
-          <div classNAme="px-4 py-3">
-            <span classNAme="block text-sm">Bonnie Green</span>
-            <span classNAme="block text-sm font-medium text-gray-900 truncate">
-              name@flowbite.com
+          <div className="repos grid grid-cols-4 gap-5">
+            <span className="col-span-2 flex flex-col">
+              <span className="text-xl">
+                Owner/<b>Repos</b>
+              </span>
+              <span className="font-light">Shorty Description</span>
+            </span>
+            <IconContext.Provider
+              value={{ style: { verticalAlign: "middle" }, size: "1.5em" }}
+            >
+              <span className="flex flex-row place-self-center gap-5 text-gray-500">
+                <span className="flex flex-row">
+                  <AiOutlineStar /> 1
+                </span>
+                <span className="flex flex-row">
+                  {" "}
+                  <AiOutlineFork /> 2{" "}
+                </span>
+                <span className="flex flex-row">
+                  {" "}
+                  <AiOutlineEye />3
+                </span>
+              </span>
+            </IconContext.Provider>
+            <span className="place-self-center text-gray-500">
+              Updated 2yrs ago
             </span>
           </div>
-          <ul classNAme="py-1" aria-labelledby="dropdown">
-            <li>
-              <a
-                href="#"
-                classNAme="text-sm hover:bg-gray-100 text-gray-700 block px-4 py-2"
-              >
-                Dashboard
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                classNAme="text-sm hover:bg-gray-100 text-gray-700 block px-4 py-2"
-              >
-                Settings
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                classNAme="text-sm hover:bg-gray-100 text-gray-700 block px-4 py-2"
-              >
-                Earnings
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                classNAme="text-sm hover:bg-gray-100 text-gray-700 block px-4 py-2"
-              >
-                Sign out
-              </a>
-            </li>
-          </ul>
         </div>
       </div>
     </div>
