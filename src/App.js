@@ -1,34 +1,46 @@
 import "./App.css";
-import { AiOutlineStar, AiOutlineFork, AiOutlineEye } from "react-icons/ai";
+import {
+  AiOutlineStar,
+  AiOutlineFork,
+  AiOutlineEye,
+  AiOutlineBranches,
+} from "react-icons/ai";
+import { VscIssues } from "react-icons/vsc";
 import { IconContext } from "react-icons";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ReactPaginate from "react-paginate";
+import ReactMarkdown from "react-markdown";
 
+axios.defaults.headers.common = {
+  Authorization: `Bearer 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`,
+};
 const baseUrl = "http://localhost:8080/api/repository/";
 function Items({ data, onChange }) {
   function handleClick(item) {
     onChange(item);
   }
   return (
-    <div className="col-span-3 flex flex-col border-t pt-3">
+    <div className="col-span-3 flex flex-col border-t pt-3 ">
       {data.length !== 0 ? (
         data.map((repo) => {
           return (
             <div
-              className="repos grid grid-cols-4 gap-5 py-3 border-b-2 "
-              onClick={()=>handleClick(repo.full_name)}
+              className="repos grid grid-cols-4 gap-5 my-3 border-b-2 cursor-pointer  bg-white"
+              onClick={() => handleClick(repo.full_name)}
             >
               <span className="col-span-2 flex flex-col">
-                <span className="text-xl">
+                <span className="text-lg hover:underline">
                   {repo.owner.login}/<b>{repo.name}</b>
                 </span>
-                <p className="font-light truncate">{repo.description}</p>
+                <p className="font-light text-base truncate">
+                  {repo.description}
+                </p>
               </span>
               <IconContext.Provider
                 value={{ style: { verticalAlign: "middle" }, size: "1.5em" }}
               >
-                <span className="flex flex-row place-self-center gap-5 text-gray-500">
+                <span className="flex flex-row place-self-center gap-4 text-gray-500">
                   <span className="flex flex-row">
                     <AiOutlineStar /> {repo.stargazers_count}
                   </span>
@@ -57,10 +69,68 @@ function Items({ data, onChange }) {
     </div>
   );
 }
-function Item({data}) {
+function Item({ data }) {
+  const [user, setuser] = useState("");
+  const [readme, setreadme] = useState("");
+  useEffect(() => {
+    const url =
+      "https://raw.githubusercontent.com/" +
+      data.full_name +
+      "/" +
+      data.default_branch +
+      "README.md";
+      console.log(url);
+    axios
+      .get("http://localhost:8080/api/user/" + data.owner.login)
+      .then((response) => {
+        console.log("Fetching User Data");
+        setuser(response.data.name);
+      }).catch((error)=>{ 
+        console.log("Error")
+          console.log(error)
+      });
+    // axios.get(url).then((response)=>{
+    //   setreadme(response.data)
+    // })
+  }, [data]);
+
   return (
-    <div className="col-span-3 flex flex-col border-t pt-3">
-      {data.full_name}
+    <div className="col-span-3 flex flex-col border-t pt-5 font-medium">
+      <a
+        href={data.html_url}
+        className="text-slate-900 no-underline hover:underline hover:text-black my-2"
+      >
+        <h3>{data.full_name}</h3>
+      </a>
+      <span className="grid grid-cols-2">
+        <a
+          href={data.owner.html_url}
+          className="text-slate-900 no-underline hover:underline hover:text-black my-2"
+        >
+          <span className="align-middle flex flex-row items-center ">
+            <img
+              src={data.owner.avatar_url}
+              alt={user}
+              className="rounded-md w-10 pr-3"
+            />
+            {user}
+          </span>
+        </a>
+        <span className="align-middle flex flex-row items-center justify-self-end">
+          <IconContext.Provider
+            value={{ style: { verticalAlign: "middle" }, size: "2em" }}
+          >
+            <AiOutlineBranches /> {data.default_branch}&nbsp;&nbsp;
+            <VscIssues />
+            &nbsp;
+            {data.open_issues_count} Issues
+          </IconContext.Provider>
+        </span>
+      </span>
+      <div className="">
+        <h2>README.md</h2>
+        <ReactMarkdown children={readme} />
+      </div>
     </div>
   );
 }
@@ -83,7 +153,7 @@ function App({ itemsPerPage }) {
   const [repo, setRepo] = useState("");
   function handleSearch() {
     axios.get(baseUrl + search).then((response) => {
-      console.log(response.data);
+      console.log("Fectching Data");
       setData((prevItem) => ({
         ...prevItem,
         total_count: response.data.total_count,
@@ -96,12 +166,12 @@ function App({ itemsPerPage }) {
     setIsSearch(false);
     setRepo(data);
   }
-  useEffect(()=>{
+  useEffect(() => {
     axios.get(baseUrl + repo).then((response) => {
-      console.log(response.data);
+      console.log("Fectching Data");
       setRepoData(response.data);
     });
-  },[repo])
+  }, [repo]);
   useEffect(() => {
     if (typeof data.items != "undefined") setitems(data.items);
   }, [data]);
@@ -122,9 +192,8 @@ function App({ itemsPerPage }) {
     );
     setItemOffset(newOffset);
   };
-  console.log(isSearch)
   return (
-    <div className="grid grid-cols-7 p-7">
+    <div className="grid grid-cols-7 p-7 text-neutral-800">
       <div></div>
       <div></div>
       <div className="col-span-3 grid grid-cols-3">
@@ -171,8 +240,10 @@ function App({ itemsPerPage }) {
               />
             </div>
           </>
+        ) : repoData.owner ? (
+          <Item data={repoData} />
         ) : (
-          <Item data={repoData}></Item>
+          <div>Searching...</div>
         )}
       </div>
     </div>
