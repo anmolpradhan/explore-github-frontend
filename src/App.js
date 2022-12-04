@@ -12,9 +12,6 @@ import axios from "axios";
 import ReactPaginate from "react-paginate";
 import ReactMarkdown from "react-markdown";
 
-axios.defaults.headers.common = {
-  Authorization: `Bearer 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`,
-};
 const baseUrl = "http://localhost:8080/api/repository/";
 function Items({ data, onChange }) {
   function handleClick(item) {
@@ -74,24 +71,23 @@ function Item({ data }) {
   const [readme, setreadme] = useState("");
   useEffect(() => {
     const url =
-      "https://raw.githubusercontent.com/" +
+      "http://localhost:8080/api/readme/" +
       data.full_name +
       "/" +
-      data.default_branch +
-      "README.md";
-      console.log(url);
+      data.default_branch;
+    console.log(url);
     axios
       .get("http://localhost:8080/api/user/" + data.owner.login)
       .then((response) => {
-        console.log("Fetching User Data");
+        console.log(response.data.name);
         setuser(response.data.name);
-      }).catch((error)=>{ 
-        console.log("Error")
-          console.log(error)
+      })
+      .catch((error) => {
+        console.log(error);
       });
-    // axios.get(url).then((response)=>{
-    //   setreadme(response.data)
-    // })
+    axios.get(url, { headers: {} }).then((response) => {
+      setreadme(response.data);
+    });
   }, [data]);
 
   return (
@@ -127,10 +123,12 @@ function Item({ data }) {
           </IconContext.Provider>
         </span>
       </span>
-      <div className="">
-        <h2>README.md</h2>
-        <ReactMarkdown children={readme} />
-      </div>
+      <span className="rounded-md border-2 mt-5">
+        <h5 className="border-b-2 py-2 px-3 bg-gray-200">README.md</h5>
+        <div className="m-3 overflow-hidden">
+          <ReactMarkdown children={readme} />
+        </div>
+      </span>
     </div>
   );
 }
